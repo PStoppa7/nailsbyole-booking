@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(254, 202, 87, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 159, 243, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .business-name {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3.5em;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #ff9ff3, #48dbfb);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite, fadeInDown 1s ease-out;
+            text-align: center;
+            margin-bottom: 15px;
+            text-shadow: 0 0 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .time-slot {
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .time-slot:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .time-slot.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .time-slot.booked {
+            background: #f8f9fa;
+            color: #999;
+            cursor: not-allowed;
+            border-color: #dee2e6;
+        }
+
+        .time-slot.closed {
+            background: #f8f9fa;
+            color: #999;
+            cursor: not-allowed;
+            border-color: #dee2e6;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        /* Animations */
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .form-group {
+            animation: slideInLeft 0.8s ease-out both;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .form-group:nth-child(5) { animation-delay: 0.5s; }
+        .form-group:nth-child(6) { animation-delay: 0.6s; }
+        .form-group:nth-child(7) { animation-delay: 0.7s; }
+
+        .business-hours {
+            animation: slideInRight 0.8s ease-out 0.2s both;
+        }
+
+        .submit-btn {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .time-slot {
+            transition: all 0.3s ease;
+        }
+
+        .time-slot:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .time-slot.selected {
+            animation: pulse 1s ease-in-out;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .business-hours {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .business-hours h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .business-hours ul {
+            list-style: none;
+            color: #666;
+        }
+
+        .business-hours li {
+            margin-bottom: 5px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .terms-checkbox input[type="checkbox"] {
+            width: auto;
+            margin-top: 5px;
+        }
+
+        .terms-label {
+            margin: 0;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="business-name">NailsByOle</div>
+            <h1><i class="fas fa-paint-brush"></i> Book Your Nail Appointment</h1>
+            <p>Schedule your nail service with our professional nail technician</p>
+        </div>
+
+        <div class="business-hours">
+            <h3><i class="fas fa-clock"></i> Business Hours</h3>
+            <ul>
+                <li><strong>Monday - Friday:</strong> 9:00 AM - 6:00 PM</li>
+                <li><strong>Saturday:</strong> 9:00 AM - 1:00 PM</li>
+                <li><strong>Sunday:</strong> Closed</li>
+            </ul>
+        </div>
+
+        <div class="alert" id="alert"></div>
+
+        <form id="bookingForm">
+            <div class="form-group">
+                <label for="name">Full Name *</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number *</label>
+                <input type="tel" id="phone" name="phone" required>
+                <small style="color: #666; font-size: 0.9em; margin-top: 5px; display: block;">
+                    <i class="fas fa-info-circle"></i> Please include country code (e.g., +27 for South Africa)
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="date">Preferred Date *</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="time">Preferred Time *</label>
+                <div class="time-slots" id="timeSlots">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading available times...
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="service">Nail Service</label>
+                <select id="service" name="service">
+                    <option value="Manicure">Manicure - $25</option>
+                    <option value="Pedicure">Pedicure - $35</option>
+                    <option value="Gel Manicure">Gel Manicure - $35</option>
+                    <option value="Gel Pedicure">Gel Pedicure - $45</option>
+                    <option value="Acrylic Full Set">Acrylic Full Set - $50</option>
+                    <option value="Acrylic Fill">Acrylic Fill - $35</option>
+                    <option value="Nail Art">Nail Art - $15</option>
+                    <option value="Nail Repair">Nail Repair - $10</option>
+                    <option value="Polish Change">Polish Change - $15</option>
+                    <option value="Gel Removal">Gel Removal - $10</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="message">Special Requests</label>
+                <textarea id="message" name="message" rows="4" placeholder="Any specific nail design, color preferences, or special requirements..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <div class="terms-checkbox">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms" class="terms-label">
+                        I agree to the <a href="#" onclick="showTerms()" style="color: #667eea; text-decoration: underline;">Terms and Conditions</a> *
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <i class="fas fa-paint-brush"></i> Book Nail Appointment
+            </button>
+        </form>
+    </div>
+
+    <!-- Terms and Conditions Modal -->
+    <div id="termsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-contract"></i> Terms and Conditions</h2>
+                <span class="close" onclick="closeTerms()">&times;</span>
+            </div>
+            <div>
+                <h3>NailsByOle Booking Terms and Conditions</h3>
+                
+                <h4>1. Booking Confirmation</h4>
+                <p>All bookings are subject to confirmation by NailsByOle. We will contact you via WhatsApp to confirm your appointment.</p>
+                
+                <h4>2. Cancellation Policy</h4>
+                <p>Please provide at least 24 hours notice for any cancellations or rescheduling. Late cancellations may incur a fee.</p>
+                
+                <h4>3. Payment</h4>
+                <p>Payment is due at the time of service. We accept cash and card payments.</p>
+                
+                <h4>4. Arrival Time</h4>
+                <p>Please arrive 5-10 minutes before your scheduled appointment time.</p>
+                
+                <h4>5. Health and Safety</h4>
+                <p>We maintain strict hygiene standards. Please inform us of any allergies or health conditions before your appointment.</p>
+                
+                <h4>6. WhatsApp Communication</h4>
+                <p>By booking with us, you agree to receive WhatsApp notifications regarding your appointment status and confirmations.</p>
+                
+                <h4>7. Privacy</h4>
+                <p>Your personal information will be used solely for appointment management and will not be shared with third parties.</p>
+                
+                <h4>8. Service Quality</h4>
+                <p>We strive for excellence in all our services. If you're not satisfied, please let us know immediately.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dateInput = document.getElementById('date');
+        const timeSlots = document.getElementById('timeSlots');
+        const submitBtn = document.getElementById('submitBtn');
+        const alertDiv = document.getElementById('alert');
+        const bookingForm = document.getElementById('bookingForm');
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+
+        // Disable Sundays
+        dateInput.addEventListener('input', function() {
+            const selectedDate = new Date(this.value);
+            if (selectedDate.getDay() === 0) { // Sunday
+                showAlert('We are closed on Sundays. Please select another date.', 'error');
+                this.value = '';
+                timeSlots.innerHTML = '<div class="loading"><div class="spinner"></div>Loading available times...</div>';
+            } else {
+                loadAvailableSlots(this.value);
+            }
+        });
+
+        function loadAvailableSlots(date) {
+            if (!date) return;
+
+            timeSlots.innerHTML = '<div class="loading"><div class="spinner"></div>Loading available times...</div>';
+
+            fetch(`/api/available-slots/${date}`)
+                .then(response => response.json())
+                .then(data => {
+                    timeSlots.innerHTML = '';
+                    
+                    if (data.availableSlots.length === 0) {
+                        timeSlots.innerHTML = '<p style="color: #666; text-align: center;">No available slots for this date.</p>';
+                        return;
+                    }
+
+                    data.availableSlots.forEach(slot => {
+                        const slotDiv = document.createElement('div');
+                        slotDiv.className = 'time-slot';
+                        slotDiv.textContent = slot;
+                        slotDiv.onclick = () => selectTimeSlot(slotDiv, slot);
+                        timeSlots.appendChild(slotDiv);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading slots:', error);
+                    timeSlots.innerHTML = '<p style="color: #f44336; text-align: center;">Error loading available times.</p>';
+                });
+        }
+
+        function selectTimeSlot(element, time) {
+            // Remove previous selection
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+            
+            // Select new slot
+            element.classList.add('selected');
+            
+            // Create hidden input for selected time
+            let timeInput = document.getElementById('selectedTime');
+            if (!timeInput) {
+                timeInput = document.createElement('input');
+                timeInput.type = 'hidden';
+                timeInput.id = 'selectedTime';
+                timeInput.name = 'time';
+                bookingForm.appendChild(timeInput);
+            }
+            timeInput.value = time;
+        }
+
+        function showAlert(message, type) {
+            alertDiv.textContent = message;
+            alertDiv.className = `alert ${type}`;
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        bookingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            if (!data.time) {
+                showAlert('Please select a time slot.', 'error');
+                return;
+            }
+
+            if (!data.terms) {
+                showAlert('Please accept the Terms and Conditions to continue.', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+            fetch('/api/bookings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    bookingForm.reset();
+                    timeSlots.innerHTML = '';
+                    
+                    // Automatically open WhatsApp and send the message to admin
+                    if (result.whatsappUrl) {
+                        setTimeout(() => {
+                            // Open WhatsApp Web with pre-filled message for admin
+                            window.open(result.whatsappUrl, '_blank');
+                            
+                            // Show notification that WhatsApp is being opened for admin
+                            showAlert('Sending WhatsApp notification to admin...', 'success');
+                        }, 1000);
+                    }
+                } else {
+                    showAlert(result.error, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred. Please try again.', 'error');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Booking';
+            });
+        });
+
+        // Load slots for today if date is set
+        if (dateInput.value) {
+            loadAvailableSlots(dateInput.value);
+        }
+
+        // Terms and Conditions Modal Functions
+        function showTerms() {
+            document.getElementById('termsModal').style.display = 'block';
+        }
+
+        function closeTerms() {
+            document.getElementById('termsModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('termsModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html> 
