@@ -462,19 +462,26 @@
                 </div>
             </div>
 
-            <div class="form-group">
+                       <div class="form-group">
+                        <label for="payment">Payment Method *</label>
+                <select id="payment" name="payment" required>
+                    <option value="">Select payment method</option>
+                    <option value="pay_online">Pay Online (Recommended)</option>
+                    <option value="pay_cash">Pay Cash at Appointment</option>
+                    <option value="pay_card">Pay by Card at Appointment</option>
+                </select>
                 <label for="service">Nail Service</label>
                 <select id="service" name="service">
-                    <option value="Manicure">Manicure - $25</option>
-                    <option value="Pedicure">Pedicure - $35</option>
-                    <option value="Gel Manicure">Gel Manicure - $35</option>
-                    <option value="Gel Pedicure">Gel Pedicure - $45</option>
-                    <option value="Acrylic Full Set">Acrylic Full Set - $50</option>
-                    <option value="Acrylic Fill">Acrylic Fill - $35</option>
-                    <option value="Nail Art">Nail Art - $15</option>
-                    <option value="Nail Repair">Nail Repair - $10</option>
-                    <option value="Polish Change">Polish Change - $15</option>
-                    <option value="Gel Removal">Gel Removal - $10</option>
+                    <option value="Manicure">Manicure - R250</option>
+                    <option value="Pedicure">Pedicure - R350</option>
+                    <option value="Gel Manicure">Gel Manicure - R350</option>
+                    <option value="Gel Pedicure">Gel Pedicure - R450</option>
+                    <option value="Acrylic Full Set">Acrylic Full Set - R500</option>
+                    <option value="Acrylic Fill">Acrylic Fill - R350</option>
+                    <option value="Nail Art">Nail Art - R150</option>
+                    <option value="Nail Repair">Nail Repair - R100</option>
+                    <option value="Polish Change">Polish Change - R150</option>
+                    <option value="Gel Removal">Gel Removal - R100</option>
                 </select>
             </div>
 
@@ -618,62 +625,86 @@
             }, 5000);
         }
 
-        bookingForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData);
-            
-            if (!data.time) {
-                showAlert('Please select a time slot.', 'error');
-                return;
+        // ...existing code...
+
+bookingForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+
+    if (!data.time) {
+        showAlert('Please select a time slot.', 'error');
+        return;
+    }
+
+    if (!data.terms) {
+        showAlert('Please accept the Terms and Conditions to continue.', 'error');
+        return;
+    }
+
+    if (!data.payment) {
+        showAlert('Please select a payment method.', 'error');
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+    // If PayFast selected, redirect to PayFast before booking
+    if (data.payment === 'payfast') {
+        // Example: Redirect to PayFast payment page (replace with your merchant details)
+        // You must set up a PayFast merchant account and use your own merchant_id and merchant_key
+        const amount = (() => {
+            const service = data.service || '';
+            const match = service.match(/R(\d+)/);
+            return match ? match[1] : '0';
+        })();
+        const payfastUrl = `https://www.payfast.co.za/eng/process?merchant_id=10000100&merchant_key=46f0cd694581a&amount=${amount}&item_name=${encodeURIComponent(data.service)}`;
+
+        showAlert('Redirecting to PayFast for secure payment...', 'success');
+        setTimeout(() => {
+            window.open(payfastUrl, '_blank');
+        }, 1200);
+        // Optionally, you can wait for payment confirmation before sending booking to backend.
+        // For demo, continue to send booking after redirect:
+    }
+
+    fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            showAlert(result.message, 'success');
+            bookingForm.reset();
+            timeSlots.innerHTML = '';
+
+            if (result.whatsappUrl) {
+                setTimeout(() => {
+                    window.open(result.whatsappUrl, '_blank');
+                    showAlert('Sending WhatsApp notification to admin...', 'success');
+                }, 1000);
             }
+        } else {
+            showAlert(result.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred. Please try again.', 'error');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Booking';
+    });
+});
 
-            if (!data.terms) {
-                showAlert('Please accept the Terms and Conditions to continue.', 'error');
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-
-            fetch('/api/bookings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    showAlert(result.message, 'success');
-                    bookingForm.reset();
-                    timeSlots.innerHTML = '';
-                    
-                    // Automatically open WhatsApp and send the message to admin
-                    if (result.whatsappUrl) {
-                        setTimeout(() => {
-                            // Open WhatsApp Web with pre-filled message for admin
-                            window.open(result.whatsappUrl, '_blank');
-                            
-                            // Show notification that WhatsApp is being opened for admin
-                            showAlert('Sending WhatsApp notification to admin...', 'success');
-                        }, 1000);
-                    }
-                } else {
-                    showAlert(result.error, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('An error occurred. Please try again.', 'error');
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Booking';
-            });
-        });
+// ...existing code...
 
         // Load slots for today if date is set
         if (dateInput.value) {
