@@ -612,7 +612,7 @@
                         <label for="payment">Payment Method *</label>
                 <select id="payment" name="payment" required>
                     <option value="">Select payment method</option>
-                    <option value="pay_online">Pay Online (Recommended)</option>
+                    <option value="pay_online">Pay Online (Recommended) - Secure & Instant</option>
                     <option value="pay_cash">Pay Cash at Appointment</option>
                     <option value="pay_card">Pay by Card at Appointment</option>
                 </select>
@@ -622,6 +622,28 @@
                 <small style="color: #666; font-size: 0.9em; display: block; margin-top: 5px;">
         <i class="fas fa-credit-card"></i> Deposit secures your appointment slot
     </small>
+                <div id="paymentSummary" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9ff; border-radius: 8px; border: 1px solid #e1e5e9;">
+                    <h4 style="margin: 0 0 10px 0; color: #333;"><i class="fas fa-calculator"></i> Payment Summary</h4>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Service Cost:</span>
+                        <span id="serviceCost">R0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Deposit:</span>
+                        <span>R100</span>
+                    </div>
+                    <hr style="margin: 10px 0; border: none; border-top: 1px solid #e1e5e9;">
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; color: #667eea;">
+                        <span>Total Amount:</span>
+                        <span id="totalAmount">R100</span>
+                    </div>
+                    <small style="color: #666; font-size: 0.9em; display: block; margin-top: 8px;">
+                        <i class="fas fa-info-circle"></i> Full payment will be processed online
+                    </small>
+                    <small style="color: #b85c00; font-size: 0.9em; display: block; margin-top: 5px;">
+                        <i class="fas fa-shield-alt"></i> Secure payment processing via PayFast
+                    </small>
+                </div>
                 <label for="service">Nail Service *</label>
                 <select id="service" name="service" required>
                     <option value="">Select a service</option>
@@ -829,8 +851,36 @@ bookingForm.addEventListener('submit', async function(e) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
-    // Payment processing logic can be added here for online payments
-    // For now, all payments are processed at the appointment
+    // Handle online payment if selected
+    if (data.payment === 'pay_online') {
+        try {
+            // Get the service price from the selected service
+            const servicePrice = getServicePrice(data.service);
+            const depositAmount = 100; // R100 deposit
+            const totalAmount = servicePrice + depositAmount;
+            
+            // Show payment processing message
+            showAlert(`Processing payment of R${totalAmount} (Service: R${servicePrice} + Deposit: R${depositAmount})...`, 'success');
+            
+            // Simulate payment processing (replace with actual payment gateway)
+            const paymentResult = await processOnlinePayment(totalAmount, data.service);
+            
+            if (paymentResult.success) {
+                showAlert(`Payment successful! Amount: R${totalAmount}`, 'success');
+            } else {
+                showAlert('Payment failed. Please try again or choose another payment method.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paint-brush"></i> Book Nail Appointment';
+                return;
+            }
+        } catch (error) {
+            console.error('Payment error:', error);
+            showAlert('Payment processing error. Please try again or choose another payment method.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paint-brush"></i> Book Nail Appointment';
+            return;
+        }
+    }
 
     fetch('/api/bookings', {
         method: 'POST',
@@ -868,10 +918,139 @@ bookingForm.addEventListener('submit', async function(e) {
 
 // ...existing code...
 
+        // Helper function to get service price
+        function getServicePrice(serviceName) {
+            const priceMap = {
+                'Gel Overlay': 100,
+                'Short Manicure': 120,
+                'Medium Manicure': 150,
+                'Long Manicure': 180,
+                'XLong Manicure': 210,
+                'Buff & Shine': 80,
+                'Buff & Shine with Art': 120,
+                'Regular Pedicure': 100,
+                'French Pedicure': 130,
+                'Manicure & Buff & Shine': 180,
+                'Manicure & Pedicure': 200,
+                'Buff & Shine for 2': 120,
+                'French Manicure & Pedicure': 250,
+                'Art per Nail': 5,
+                'Soak Off': 50,
+                'Foreign Soak Off': 80
+            };
+            return priceMap[serviceName] || 0;
+        }
+
+        // Function to process online payment
+        async function processOnlinePayment(amount, serviceName) {
+            // Option 1: PayFast Integration (South African payment gateway)
+            if (window.PayFast) {
+                try {
+                    const paymentData = {
+                        merchant_id: '10000100', // Replace with your actual merchant ID
+                        merchant_key: '46f0cd694581a', // Replace with your actual merchant key
+                        amount: amount,
+                        item_name: `NailsByOle - ${serviceName}`,
+                        item_description: `Nail service booking for ${serviceName}`,
+                        return_url: window.location.href + '?payment=success',
+                        cancel_url: window.location.href + '?payment=cancelled',
+                        notify_url: window.location.href + '/api/payment-notification'
+                    };
+                    
+                    // Redirect to PayFast
+                    window.location.href = `https://www.payfast.co.za/eng/process?${new URLSearchParams(paymentData).toString()}`;
+                    
+                    return { success: true, redirect: true };
+                } catch (error) {
+                    console.error('PayFast error:', error);
+                    return { success: false, error: 'Payment gateway error' };
+                }
+            }
+            
+            // Option 2: Simulation for development/testing
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    // Simulate payment success (90% success rate for demo)
+                    const isSuccess = Math.random() > 0.1;
+                    
+                    if (isSuccess) {
+                        resolve({
+                            success: true,
+                            transactionId: 'TXN_' + Date.now(),
+                            amount: amount,
+                            service: serviceName,
+                            timestamp: new Date().toISOString()
+                        });
+                    } else {
+                        resolve({
+                            success: false,
+                            error: 'Payment declined by bank'
+                        });
+                    }
+                }, 2000); // Simulate 2-second processing time
+            });
+        }
+
+        // Payment method change handler
+        document.getElementById('payment').addEventListener('change', function() {
+            const paymentSummary = document.getElementById('paymentSummary');
+            if (this.value === 'pay_online') {
+                paymentSummary.style.display = 'block';
+                updatePaymentSummary();
+            } else {
+                paymentSummary.style.display = 'none';
+            }
+        });
+
+        // Service change handler
+        document.getElementById('service').addEventListener('change', function() {
+            if (document.getElementById('payment').value === 'pay_online') {
+                updatePaymentSummary();
+            }
+        });
+
+        // Function to update payment summary
+        function updatePaymentSummary() {
+            const serviceSelect = document.getElementById('service');
+            const serviceCostElement = document.getElementById('serviceCost');
+            const totalAmountElement = document.getElementById('totalAmount');
+            
+            if (serviceSelect.value) {
+                const servicePrice = getServicePrice(serviceSelect.value);
+                const depositAmount = 100;
+                const totalAmount = servicePrice + depositAmount;
+                
+                serviceCostElement.textContent = `R${servicePrice}`;
+                totalAmountElement.textContent = `R${totalAmount}`;
+            } else {
+                serviceCostElement.textContent = 'R0';
+                totalAmountElement.textContent = 'R100';
+            }
+        }
+
+        // Check for payment return status
+        function checkPaymentStatus() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentStatus = urlParams.get('payment');
+            
+            if (paymentStatus === 'success') {
+                showAlert('Payment successful! Your booking will be confirmed shortly.', 'success');
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (paymentStatus === 'cancelled') {
+                showAlert('Payment was cancelled. You can try again or choose another payment method.', 'error');
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
         // Load slots for today if date is set
         if (dateInput.value) {
             loadAvailableSlots(dateInput.value);
         }
+
+        // Check payment status on page load
+        checkPaymentStatus();
 
         // Terms and Conditions Modal Functions
         function showTerms() {

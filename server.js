@@ -325,6 +325,31 @@ app.get('/api/admin/notifications', (req, res) => {
     res.json(notifications);
 });
 
+// Payment notification endpoint for payment gateways
+app.post('/api/payment-notification', (req, res) => {
+    console.log('Payment notification received:', req.body);
+    
+    // Handle payment confirmation from payment gateway
+    // This would typically include payment verification
+    const { payment_status, amount, item_name, custom_str1 } = req.body;
+    
+    if (payment_status === 'COMPLETE') {
+        console.log(`Payment completed: ${amount} for ${item_name}`);
+        
+        // Here you would:
+        // 1. Verify the payment with the payment gateway
+        // 2. Update the booking status to 'paid'
+        // 3. Send confirmation to customer
+        // 4. Send notification to admin
+        
+        // For now, just log the successful payment
+        console.log('Payment successful - booking should be confirmed');
+    }
+    
+    // Always respond with success to payment gateway
+    res.status(200).send('OK');
+});
+
 app.listen(PORT, () => {
     console.log(`Booking system running on http://localhost:${PORT}`);
 }); 
