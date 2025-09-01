@@ -391,6 +391,12 @@
         .price-item:nth-child(8) { animation-delay: 1.2s; }
         .price-item:nth-child(9) { animation-delay: 1.3s; }
         .price-item:nth-child(10) { animation-delay: 1.4s; }
+        .price-item:nth-child(11) { animation-delay: 1.5s; }
+        .price-item:nth-child(12) { animation-delay: 1.6s; }
+        .price-item:nth-child(13) { animation-delay: 1.7s; }
+        .price-item:nth-child(14) { animation-delay: 1.8s; }
+        .price-item:nth-child(15) { animation-delay: 1.9s; }
+        .price-item:nth-child(16) { animation-delay: 2.0s; }
 
         .loading {
             display: none;
@@ -497,44 +503,68 @@
             <h3><i class="fas fa-tags"></i> Service Pricing</h3>
             <div class="price-grid">
                 <div class="price-item">
-                    <span class="service">Manicure</span>
+                    <span class="service">Gel Overlay</span>
+                    <span class="price">R100</span>
+                </div>
+                <div class="price-item">
+                    <span class="service">Short Manicure</span>
+                    <span class="price">R120</span>
+                </div>
+                <div class="price-item">
+                    <span class="service">Medium Manicure</span>
+                    <span class="price">R150</span>
+                </div>
+                <div class="price-item">
+                    <span class="service">Long Manicure</span>
+                    <span class="price">R180</span>
+                </div>
+                <div class="price-item">
+                    <span class="service">XLong Manicure</span>
+                    <span class="price">R210</span>
+                </div>
+                <div class="price-item">
+                    <span class="service">Buff & Shine</span>
+                    <span class="price">R80</span>
+                </div>
+                <div class="price-item">
+                    <span class="service">Buff & Shine with Art</span>
+                    <span class="price">R120</span>
+                </div>
+                <div class="price-item">
+                    <span class="service">Regular Pedicure</span>
+                    <span class="price">R100</span>
+                </div>
+                <div class="price-item">
+                    <span class="service">French Pedicure</span>
+                    <span class="price">R130</span>
+                </div>
+                <div class="price-item">
+                    <span class="service">Manicure & Buff & Shine</span>
+                    <span class="price">R180</span>
+                </div>
+                <div class="price-item">
+                    <span class="service">Manicure & Pedicure</span>
+                    <span class="price">R200</span>
+                </div>
+                <div class="price-item">
+                    <span class="service">Buff & Shine for 2</span>
+                    <span class="price">R120</span>
+                </div>
+                <div class="price-item">
+                    <span class="service">French Manicure & Pedicure</span>
                     <span class="price">R250</span>
                 </div>
                 <div class="price-item">
-                    <span class="service">Pedicure</span>
-                    <span class="price">R350</span>
+                    <span class="service">Art per Nail</span>
+                    <span class="price">R5</span>
                 </div>
                 <div class="price-item">
-                    <span class="service">Gel Manicure</span>
-                    <span class="price">R350</span>
+                    <span class="service">Soak Off</span>
+                    <span class="price">R50</span>
                 </div>
                 <div class="price-item">
-                    <span class="service">Gel Pedicure</span>
-                    <span class="price">R450</span>
-                </div>
-                <div class="price-item">
-                    <span class="service">Acrylic Full Set</span>
-                    <span class="price">R500</span>
-                </div>
-                <div class="price-item">
-                    <span class="service">Acrylic Fill</span>
-                    <span class="price">R350</span>
-                </div>
-                <div class="price-item">
-                    <span class="service">Nail Art</span>
-                    <span class="price">R150</span>
-                </div>
-                <div class="price-item">
-                    <span class="service">Nail Repair</span>
-                    <span class="price">R100</span>
-                </div>
-                <div class="price-item">
-                    <span class="service">Polish Change</span>
-                    <span class="price">R150</span>
-                </div>
-                <div class="price-item">
-                    <span class="service">Gel Removal</span>
-                    <span class="price">R100</span>
+                    <span class="service">Foreign Soak Off</span>
+                    <span class="price">R80</span>
                 </div>
             </div>
             <p style="text-align: center; margin-top: 15px; color: #666; font-size: 0.9em;">
@@ -595,16 +625,32 @@
                 <label for="service">Nail Service *</label>
                 <select id="service" name="service" required>
                     <option value="">Select a service</option>
-                    <option value="Manicure">Manicure - R250</option>
-                    <option value="Pedicure">Pedicure - R350</option>
-                    <option value="Gel Manicure">Gel Manicure - R350</option>
-                    <option value="Gel Pedicure">Gel Pedicure - R450</option>
-                    <option value="Acrylic Full Set">Acrylic Full Set - R500</option>
-                    <option value="Acrylic Fill">Acrylic Fill - R350</option>
-                    <option value="Nail Art">Nail Art - R150</option>
-                    <option value="Nail Repair">Nail Repair - R100</option>
-                    <option value="Polish Change">Polish Change - R150</option>
-                    <option value="Gel Removal">Gel Removal - R100</option>
+                    <optgroup label="Manicure">
+                        <option value="Gel Overlay">Gel Overlay - R100</option>
+                        <option value="Short Manicure">Short Manicure - R120</option>
+                        <option value="Medium Manicure">Medium Manicure - R150</option>
+                        <option value="Long Manicure">Long Manicure - R180</option>
+                        <option value="XLong Manicure">XLong Manicure - R210</option>
+                    </optgroup>
+                    <optgroup label="Buff & Shine">
+                        <option value="Buff & Shine">Buff & Shine - R80</option>
+                        <option value="Buff & Shine with Art">Buff & Shine with Art - R120</option>
+                    </optgroup>
+                    <optgroup label="Pedicure">
+                        <option value="Regular Pedicure">Regular Pedicure (Plain) - R100</option>
+                        <option value="French Pedicure">French Pedicure - R130</option>
+                    </optgroup>
+                    <optgroup label="Special Packages">
+                        <option value="Manicure & Buff & Shine">Manicure & Buff & Shine - R180</option>
+                        <option value="Manicure & Pedicure">Manicure & Pedicure - R200</option>
+                        <option value="Buff & Shine for 2">Buff & Shine for 2 - R120</option>
+                        <option value="French Manicure & Pedicure">French Manicure & Pedicure - R250</option>
+                    </optgroup>
+                    <optgroup label="Extras">
+                        <option value="Art per Nail">Art per Nail - R5</option>
+                        <option value="Soak Off">Soak Off - R50</option>
+                        <option value="Foreign Soak Off">Foreign Soak Off - R80</option>
+                    </optgroup>
                 </select>
                 <small style="color: #666; font-size: 0.9em; display: block; margin-top: 5px;">
         <i class="fas fa-tags"></i> All prices are in South African Rands (R)
